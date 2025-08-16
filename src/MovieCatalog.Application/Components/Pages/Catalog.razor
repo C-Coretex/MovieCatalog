@@ -1,11 +1,77 @@
 ﻿@page "/catalog"
-
+@using MovieCatalog.Application.Contracts.DTOs
+@using MovieCatalog.Application.Contracts.IAppServices
+@inject IMovieCatalogAppService MovieCatalogAppService
+@rendermode InteractiveServer
 <PageTitle>Movie Catalog</PageTitle>
 
-<h3>Movie Catalog - aaa</h3>
+<h3>Movie Catalog</h3>
 
-<p>here will be a component with input and grid (or even show everything on this page)</p>
+<p>Search by movie title</p>
+
+<input type="text" @bind="_title" placeholder="Enter movie title..." />
+<button @onclick="OnSearchAsync">Search</button>
+
+@if (_results is not null)
+{
+    <ul>
+        @foreach (var item in _results)
+        {
+            if (item.Poster != "N/A")
+            {
+                <img src="@item.Poster"/>
+            }
+            else
+            {
+                <p>N/A</p>
+            }
+
+            <li>@item.Title</li>
+            <li>@item.Year</li>
+            <li>@item.Type</li>
+            <li>@item.Title</li>
+            <a href="/details?id=@item.ImdbId">Details</a>
+        }
+    </ul>
+}
+else
+{
+    <p>Please input some value.</p>
+}
+@if (_apiException)
+{
+    <p>There was an exception with API. Please try again.</p>
+}
 
 @code {
+    private string _title = string.Empty;
+    private bool _apiException;
+    private LinkedList<ShortMovieDto>? _results; //linked list, since we will add items one by one without accessing by index
 
+    public async Task OnSearchAsync()
+    {
+        _apiException = false;
+        if (string.IsNullOrWhiteSpace(_title))
+        {
+            _results = null;
+            return;
+        }
+
+        _results = [];
+        await foreach (var item in MovieCatalogAppService.GetMoviesByTitle(_title))
+        {
+            //stream failed
+            if (!item.Successful || item.Entry == null)
+            {
+                _results = null;
+                _apiException = true;
+                break;
+            }
+
+            _results.AddLast(item.Entry!);
+            //notify Blazor to re-render the component on UI
+            //if it will be a performance problem we can add something like debounce, so we will send updates in batches
+            StateHasChanged();
+        }
+    }
 }

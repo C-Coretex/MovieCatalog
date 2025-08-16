@@ -1,2 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <UserSecretsId>f3a83b6b-6bd0-4346-8432-dcd0e0dd89f4</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MovieCatalog.Application.Services\MovieCatalog.Application.Services.csproj" />
+    <ProjectReference Include="..\MovieCatalog.Providers.Omdb\MovieCatalog.Providers.Omdb.csproj" />
+  </ItemGroup>
 </Project>

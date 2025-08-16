@@ -11,13 +11,16 @@ namespace MovieCatalog.Providers.Omdb.Repositories
 {
     internal class OmdbMovieRepository(OmdbApiClient client, OmdbImgApiClient imgClient) : IOmdbMovieRepository
     {
-        //in future if the repository would support more filters/options, we could introduce request builder e.g. request.AddFilter(new TitleFilter(title));
-        public async IAsyncEnumerable<ShortMovieOmdbDto> GetMoviesByTitle(string title, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        private const int PageSize = 10;
+
+        public async IAsyncEnumerable<OmdbResult<ShortMovieOmdbDto>> GetMoviesByTitle(string title, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var i = 0;
+            var totalData = -1;
             bool isSuccess;
             do
             {
+                //in future if the repository would support more filters/options, we could introduce request builder e.g. request.AddFilter(new TitleFilter(title));
                 var data = await client.GetAsync(
                     cancellationToken,
                     (OmdbConstants.QueryNames.TitleAllName, title),
@@ -28,31 +31,36 @@ namespace MovieCatalog.Providers.Omdb.Repositories
                 if (!isSuccess) 
                     break;
 
+                if(result?.TotalResults.HasValue == true)
+                    totalData = result.TotalResults.Value;
+
                 foreach (var item in result!.Search)
-                    yield return 
+                    yield return OmdbResult<ShortMovieOmdbDto>.CreateSuccessful(
                         new ShortMovieOmdbDto(
                             item.Title.FormatNullableString(),
                             item.Year.FormatNullableString(),
                             item.ImdbId.FormatNullableString(),
                             item.Type.FormatNullableString(),
-                            item.Poster.FormatNullableString());
+                            item.Poster.FormatNullableString()));
             } while (isSuccess);
+
+            //we didn't get any data, or we didn't reach to the end
+            if(totalData == -1 || PageSize * i < totalData)
+                yield return OmdbResult<ShortMovieOmdbDto>.CreateFailed();
         }
 
-        public async Task<FullMovieOmdbDto?> GetMovieDetailsById(string id, CancellationToken cancellationToken = default)
+        public async Task<OmdbResult<FullMovieOmdbDto>> GetMovieDetailsById(string id, CancellationToken cancellationToken = default)
         {
             var data = await client.GetAsync(
-                "?",
                 cancellationToken,
                 (OmdbConstants.QueryNames.IdFirstName, id),
                 (OmdbConstants.QueryNames.PlotTypeName, OmdbConstants.PlotTypes.Full));
 
             var result = await data.Content.ReadFromJsonAsync<OmdbFullResponseDto>(cancellationToken);
             if (result?.Response != true)
-                return null;
+                return OmdbResult<FullMovieOmdbDto>.CreateFailed();
 
-
-            return new FullMovieOmdbDto(
+            return OmdbResult<FullMovieOmdbDto>.CreateSuccessful(new FullMovieOmdbDto(
                 result.Title.FormatNullableString(),
                 result.Year.FormatNullableString(),
                 result.Rated.FormatNullableString(),
@@ -76,7 +84,7 @@ namespace MovieCatalog.Providers.Omdb.Repositories
                 result.Dvd.FormatNullableString(),
                 result.BoxOffice.FormatNullableString(),
                 result.Production.FormatNullableString(),
-                result.Website.FormatNullableString());
+                result.Website.FormatNullableString()));
         }
     }
 }

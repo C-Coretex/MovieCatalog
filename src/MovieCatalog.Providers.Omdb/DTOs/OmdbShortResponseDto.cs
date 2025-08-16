@@ -7,7 +7,8 @@ namespace MovieCatalog.Providers.Omdb.DTOs
     {
         [JsonConverter(typeof(Converters.BooleanConverter))]
         public bool Response { get; set; }
-
+        [JsonConverter(typeof(Converters.IntConverter))]
+        public int? TotalResults { get; set; }
         public ICollection<OmdbShortSearchItemDto> Search { get; set; } = [];
     }
 

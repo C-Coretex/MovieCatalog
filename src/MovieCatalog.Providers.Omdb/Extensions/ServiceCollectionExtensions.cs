@@ -13,6 +13,7 @@ namespace MovieCatalog.Providers.Omdb.Extensions
         {
             serviceCollection.AddOptions<OmdbApiOptions>().Bind(configuration.GetSection(optionsPath));
             serviceCollection.AddHttpClient<OmdbApiClient>();
+            serviceCollection.AddHttpClient<OmdbImgApiClient>();
 
             serviceCollection.AddScoped<IOmdbMovieRepository, OmdbMovieRepository>();
 

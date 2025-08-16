@@ -1,6 +1,6 @@
-﻿namespace MovieCatalog.Providers.Omdb.Contracts.DTOs
+﻿namespace MovieCatalog.Application.Contracts.DTOs
 {
-    public record FullMovieOmdbDto(
+    public record FullMovieDto(
         string Title,
         string Year,
         string Rated,
@@ -15,7 +15,7 @@
         ICollection<string> Countries,
         string Awards,
         string PosterUrl,
-        ICollection<RatingOmdbItemDto> Ratings,
+        ICollection<(string Source, int ValuePercent)> Ratings,
         string Metascore,
         float? ImdbRating,
         int? ImdbVotes,
@@ -23,9 +23,7 @@
         string Type,
         string Dvd,
         string BoxOffice,
-        string Production,
-        string Website
-        )
+        string Production)
     {
     }
 }

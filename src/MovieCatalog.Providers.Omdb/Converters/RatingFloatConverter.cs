@@ -18,7 +18,7 @@ namespace MovieCatalog.Providers.Omdb.Converters
 
             var splittedElements = value.Split('/');
             if (splittedElements.Length != 2)
-                throw new ArgumentException($"Unexpected rating format. Value: '{value}'");
+                throw new ArgumentException($"Unexpected rating format. Value: '{value}'", nameof(value));
 
             return float.Parse(splittedElements[0], CultureInfo.InvariantCulture) / float.Parse(splittedElements[1], CultureInfo.InvariantCulture);
         }
