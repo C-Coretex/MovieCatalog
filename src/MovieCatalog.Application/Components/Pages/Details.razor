@@ -1,11 +1,72 @@
 ﻿@page "/details"
+@attribute [StreamRendering]
+@using MovieCatalog.Application.Contracts.DTOs
+@using MovieCatalog.Application.Contracts.IAppServices
+@inject IMovieCatalogAppService MovieCatalogAppService
 
 <PageTitle>Movie Details</PageTitle>
 
-<h3>Movie Details - aaa</h3>
+<h3>Movie Details for @(_entry is null ? Id : _entry.Title)</h3>
 
-<p>here will be a component with input and grid (or even show everything on this page)</p>
+@if (_entry is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div>
+        <h4>@_entry.Title (@_entry.Year)</h4>
+        <img src="@_entry.PosterUrl" alt="Movie Poster" style="max-width:200px;" />
+
+        <p><strong>Director:</strong> @_entry.Director</p>
+        <p><strong>Actors:</strong> @string.Join(", ", _entry.Actors)</p>
+        <p><strong>Plot:</strong> @_entry.Plot</p>
+        <p><strong>Genres:</strong> @string.Join(", ", _entry.Genres)</p>
+        <p><strong>Languages:</strong> @string.Join(", ", _entry.Languages)</p>
+        <p><strong>Countries:</strong> @string.Join(", ", _entry.Countries)</p>
+        <p><strong>Awards:</strong> @_entry.Awards</p>
+        <p><strong>Runtime:</strong> @_entry.Runtime</p>
+        <p><strong>Rated:</strong> @_entry.Rated</p>
+        <p><strong>Released:</strong> @_entry.Released</p>
+        <p><strong>Dvd:</strong> @_entry.Dvd</p>
+        <p><strong>BoxOffice:</strong> @_entry.BoxOffice</p>
+        <p><strong>Production:</strong> @_entry.Production</p>
+        <p><strong>Metascore:</strong> @_entry.Metascore</p>
+        <p><strong>IMDB Rating:</strong> @_entry.ImdbRating</p>
+        <p><strong>IMDB Votes:</strong> @_entry.ImdbVotes</p>
+        <p><strong>Type:</strong> @_entry.Type</p>
+        <p><strong>IMDB ID:</strong> @_entry.ImdbId</p>
+
+        <p><strong>Ratings:</strong> 
+            @foreach (var rating in _entry.Ratings)
+            {
+                <span>@rating.Source: @rating.ValuePercent% </span>
+            }
+        </p>
+    </div>
+}
+@if (_apiException)
+{
+    <p>There was an exception with API. Please try again.</p>
+}
 
 @code {
 
+    [SupplyParameterFromQuery]
+    public string Id { get; set; }
+
+    private FullMovieDto? _entry;
+    private bool _apiException;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(string.IsNullOrWhiteSpace(Id))
+            _apiException = true;
+
+        var data = await MovieCatalogAppService.GetMovieDetailsById(Id);
+        if (!data.Successful)
+            _apiException = true;
+        else
+            _entry = data.Entry;
+    }
 }

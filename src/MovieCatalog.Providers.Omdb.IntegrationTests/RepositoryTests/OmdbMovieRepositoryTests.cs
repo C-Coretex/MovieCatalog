@@ -47,7 +47,7 @@ namespace MovieCatalog.Providers.Omdb.IntegrationTests.RepositoryTests
         [InlineData(false)]
         public async Task GetMovieDetails_ShouldReturnMovieDetails(bool existingMovie)
         {
-            var id = existingMovie ? "tt0499549" : "tt9999999";
+            var id = existingMovie ? "tt0499549" : "tt999a999";
             var details = await _omdbMovieRepository.GetMovieDetailsById(id);
 
             details.Should().NotBeNull();
