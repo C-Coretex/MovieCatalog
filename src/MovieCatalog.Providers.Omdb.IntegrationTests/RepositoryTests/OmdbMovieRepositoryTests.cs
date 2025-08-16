@@ -12,7 +12,7 @@ namespace MovieCatalog.Providers.Omdb.IntegrationTests.RepositoryTests
 
         public OmdbMovieRepositoryTest(): base()
         {
-            _omdbMovieRepository = new OmdbMovieRepository(OmdbApiClient, OmdbImgApiClient);
+            _omdbMovieRepository = new OmdbMovieRepository(OmdbApiClient);
         }
 
         [Theory]

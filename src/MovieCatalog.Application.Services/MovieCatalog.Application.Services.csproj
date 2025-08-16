@@ -9,4 +9,13 @@
     <ProjectReference Include="..\MovieCatalog.Domain\MovieCatalog.Domain.csproj" />
     <ProjectReference Include="..\MovieCatalog.Providers.Omdb.Contracts\MovieCatalog.Providers.Omdb.Contracts.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>MovieCatalog.Application.Services.UnitTests</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 </Project>

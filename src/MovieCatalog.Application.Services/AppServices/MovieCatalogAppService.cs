@@ -23,7 +23,6 @@ namespace MovieCatalog.Application.Services.AppServices
                 logger.LogError(e, "Exception on query entity save");
                 throw;
             }
-            
 
             var entries = omdbMovieRepository.GetMoviesByTitle(title)
                 .Select(movie => (

@@ -5,6 +5,7 @@ using MovieCatalog.Domain.IRepositories;
 
 namespace MovieCatalog.Infrastructure.Repositories
 {
+    //if there would be several repositories, we could introduce BaseRepository with basic method (GetAll with selector, GetById, Add/Update...)
     internal class QueryHistoryRepository: IQueryHistoryRepository
     {
         private readonly MovieCatalogDbContext _dbContext;
@@ -17,7 +18,8 @@ namespace MovieCatalog.Infrastructure.Repositories
 
         public IAsyncEnumerable<TModel> GetLastEntries<TModel>(Expression<Func<QueryHistoryEntity, TModel>> selector, int take)
         {
-            return _dbSet.AsNoTracking()
+            //don't need AsNoTracking, since we are applying selector
+            return _dbSet
                 .OrderByDescending(x => x.CreatedTimestamp)
                 .Take(take)
                 .Select(selector)

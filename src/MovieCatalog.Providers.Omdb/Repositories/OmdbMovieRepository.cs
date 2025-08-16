@@ -1,18 +1,16 @@
 ﻿using MovieCatalog.Providers.Omdb.Constants;
-using MovieCatalog.Providers.Omdb.Contracts.Client;
 using MovieCatalog.Providers.Omdb.Contracts.DTOs;
 using MovieCatalog.Providers.Omdb.Contracts.IRepositories;
 using MovieCatalog.Providers.Omdb.DTOs;
 using MovieCatalog.Providers.Omdb.Helpers;
-using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using MovieCatalog.Providers.Omdb.Contracts.Clients;
 
 namespace MovieCatalog.Providers.Omdb.Repositories
 {
-    internal class OmdbMovieRepository(OmdbApiClient client, OmdbImgApiClient imgClient) : IOmdbMovieRepository
+    internal class OmdbMovieRepository(OmdbApiClient client) : IOmdbMovieRepository
     {
         private const int PageSize = 10;
         private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions

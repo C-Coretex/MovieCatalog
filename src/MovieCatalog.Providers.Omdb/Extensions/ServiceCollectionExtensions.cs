@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MovieCatalog.Providers.Omdb.Contracts.Client;
+using MovieCatalog.Providers.Omdb.Contracts.Clients;
 using MovieCatalog.Providers.Omdb.Contracts.IRepositories;
 using MovieCatalog.Providers.Omdb.Contracts.Options;
 using MovieCatalog.Providers.Omdb.Repositories;
@@ -13,7 +13,6 @@ namespace MovieCatalog.Providers.Omdb.Extensions
         {
             serviceCollection.AddOptions<OmdbApiOptions>().Bind(configuration.GetSection(optionsPath));
             serviceCollection.AddHttpClient<OmdbApiClient>();
-            serviceCollection.AddHttpClient<OmdbImgApiClient>();
 
             serviceCollection.AddScoped<IOmdbMovieRepository, OmdbMovieRepository>();
 
