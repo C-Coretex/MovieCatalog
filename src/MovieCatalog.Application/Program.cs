@@ -1,13 +1,18 @@
 using MovieCatalog.Application.Components;
 using MovieCatalog.Application.Extensions;
+using MovieCatalog.Infrastructure.Migrations.Factory;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+var movieCatalogConnectionString = builder.Configuration.GetConnectionString("MovieCatalogConnectionString")
+                                    ?? throw new ArgumentException("'MovieCatalogConnectionString' is not configured.");
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.RegisterServices(builder.Configuration);
+builder.Services.RegisterServices(builder.Configuration, movieCatalogConnectionString);
 
 var app = builder.Build();
 
@@ -15,6 +20,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     builder.Configuration.AddUserSecrets<Program>();
+    MovieCatalogMigrationsDbContext.ApplyMigrations(movieCatalogConnectionString);
 }
 else
 {
