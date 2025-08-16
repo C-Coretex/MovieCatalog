@@ -44,7 +44,7 @@ namespace MovieCatalog.Providers.Omdb.Repositories
                     if (response?.Response != true)
                         break;
                 }
-                catch (JsonException e)
+                catch (JsonException)
                 {
                     // Using this, because sometimes with incorrect Id passed, API returns error with incorrect Json (there are '"' inside of string value)
                     // JsonDeserializer throws the exception and the easiest way to handle it is to catch it.
@@ -89,7 +89,7 @@ namespace MovieCatalog.Providers.Omdb.Repositories
                 if (response?.Response != true)
                     return OmdbResult<FullMovieOmdbDto>.CreateFailed();
             }
-            catch (JsonException e)
+            catch (JsonException)
             {
                 // Using this, because sometimes with incorrect Id passed, API returns error with incorrect Json (there are '"' inside of string value)
                 // JsonDeserializer throws the exception and the easiest way to handle it is to catch it.

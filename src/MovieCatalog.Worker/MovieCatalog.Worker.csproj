@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <UserSecretsId>dotnet-MovieCatalog.Worker-6b2b695e-6ec9-40cc-9b67-43c5a36bf2d3</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MovieCatalog.Application.Services\MovieCatalog.Application.Services.csproj" />
+    <ProjectReference Include="..\MovieCatalog.Providers.Omdb\MovieCatalog.Providers.Omdb.csproj" />
+  </ItemGroup>
+</Project>
