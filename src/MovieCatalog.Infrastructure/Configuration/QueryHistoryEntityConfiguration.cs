@@ -8,6 +8,8 @@ namespace MovieCatalog.Infrastructure.Configuration
     {
         public void Configure(EntityTypeBuilder<QueryHistoryEntity> builder)
         {
+            builder.ToTable(nameof(MovieCatalogDbContext.QueryHistory));
+
             builder.HasKey(p => p.Id);
 
             builder.Property(p => p.QueryTitle)
@@ -15,7 +17,8 @@ namespace MovieCatalog.Infrastructure.Configuration
                 .HasMaxLength(128);
             builder.Property(p => p.CreatedTimestamp).IsRequired();
 
-            builder.HasIndex(p => p.CreatedTimestamp);
+            //Descending, since all of our queries will be ordered by desc
+            builder.HasIndex(p => p.CreatedTimestamp).IsDescending(true);
         }
     }
 }

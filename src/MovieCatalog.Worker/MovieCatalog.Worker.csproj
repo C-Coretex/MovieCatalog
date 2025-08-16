@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MovieCatalog.Application.Services\MovieCatalog.Application.Services.csproj" />
+    <ProjectReference Include="..\MovieCatalog.Infrastructure.Migrations\MovieCatalog.Infrastructure.Migrations.csproj" />
+    <ProjectReference Include="..\MovieCatalog.Infrastructure\MovieCatalog.Infrastructure.csproj" />
     <ProjectReference Include="..\MovieCatalog.Providers.Omdb\MovieCatalog.Providers.Omdb.csproj" />
   </ItemGroup>
 </Project>

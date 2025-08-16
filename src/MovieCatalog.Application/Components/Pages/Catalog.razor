@@ -1,15 +1,31 @@
 ﻿@page "/catalog"
+@attribute [StreamRendering]
+@using Ganss.Xss
 @using MovieCatalog.Application.Contracts.DTOs
 @using MovieCatalog.Application.Contracts.IAppServices
 @inject IMovieCatalogAppService MovieCatalogAppService
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 <PageTitle>Movie Catalog</PageTitle>
 
 <h3>Movie Catalog</h3>
 
+<p>Last query history:</p>
+@if (_queryHistory is null)
+{
+    <p>History loading</p>
+}
+else
+{
+    @foreach (var item in _queryHistory)
+    {
+        <div>
+            <a href="/catalog?titleQuery=@item.Query">@item.Query - @item.Timestamp</a>
+        </div>
+    }
+}
 <p>Search by movie title</p>
 
-<input type="text" @bind="_title" placeholder="Enter movie title..." />
+<input type="text" @bind="TitleQuery" placeholder="Enter movie title..." />
 <button @onclick="OnSearchAsync">Search</button>
 
 @if (_results is not null)
@@ -44,22 +60,51 @@ else
 }
 
 @code {
-    private string _title = string.Empty;
+    [SupplyParameterFromQuery]
+    public string TitleQuery { get; set; } = string.Empty;
+    private string? _lastQuery;
+    private ICollection<QueryHistoryEntryDto>? _queryHistory = null;
     private bool _apiException;
     private LinkedList<ShortMovieDto>? _results; //linked list, since we will add items one by one without accessing by index
 
+    private async Task SetQueryHistory()
+    {
+        var sanitizer = new HtmlSanitizer();
+        _queryHistory = await MovieCatalogAppService.GetLastQueryHistory().Select(x => x with { Query = sanitizer.Sanitize(x.Query) }).ToListAsync();
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        return SetQueryHistory();
+    }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(TitleQuery) && !string.Equals(TitleQuery, _lastQuery, StringComparison.Ordinal))
+            await OnSearchAsync();
+    }
+
     public async Task OnSearchAsync()
     {
+        _lastQuery = TitleQuery;
         _apiException = false;
-        if (string.IsNullOrWhiteSpace(_title))
+        if (string.IsNullOrWhiteSpace(TitleQuery))
         {
             _results = null;
             return;
         }
 
         _results = [];
-        await foreach (var item in MovieCatalogAppService.GetMoviesByTitle(_title))
+        var isQueryHistorySet = false;
+        await foreach (var item in MovieCatalogAppService.GetMoviesByTitle(TitleQuery))
         {
+            if (!isQueryHistorySet)
+            {
+                await SetQueryHistory();
+                isQueryHistorySet = true;
+            }
+
             //stream failed
             if (!item.Successful || item.Entry == null)
             {
@@ -68,7 +113,8 @@ else
                 break;
             }
 
-            _results.AddLast(item.Entry!);
+            _results?.AddLast(item.Entry!); //should not be null, but since it's IAsyncEnumerable there could be race conditions
+
             //notify Blazor to re-render the component on UI
             //if it will be a performance problem we can add something like debounce, so we will send updates in batches
             StateHasChanged();

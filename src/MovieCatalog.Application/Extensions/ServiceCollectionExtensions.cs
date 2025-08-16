@@ -8,7 +8,6 @@ namespace MovieCatalog.Application.Extensions
     {
         public static IServiceCollection RegisterServices(this IServiceCollection serviceCollection, IConfiguration configuration, string movieCatalogConnectionString)
         {
-            
             serviceCollection.RegisterMovieCatalogDatabase(movieCatalogConnectionString);
 
             serviceCollection.RegisterOmdbProvider(configuration);

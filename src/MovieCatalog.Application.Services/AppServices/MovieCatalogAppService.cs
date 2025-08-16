@@ -1,14 +1,31 @@
-﻿using MovieCatalog.Application.Contracts.DTOs;
+﻿using Microsoft.Extensions.Logging;
+using MovieCatalog.Application.Contracts.DTOs;
 using MovieCatalog.Application.Contracts.IAppServices;
+using MovieCatalog.Domain.IRepositories;
 using MovieCatalog.Providers.Omdb.Contracts.IRepositories;
 
 namespace MovieCatalog.Application.Services.AppServices
 {
-    internal class MovieCatalogAppService(IOmdbMovieRepository omdbMovieRepository) : IMovieCatalogAppService
+    internal class MovieCatalogAppService(ILogger<MovieCatalogAppService> logger, IOmdbMovieRepository omdbMovieRepository, IQueryHistoryRepository queryHistoryRepository) : IMovieCatalogAppService
     {
-        public IAsyncEnumerable<(bool Successful, ShortMovieDto? Entry)> GetMoviesByTitle(string title)
+        public IAsyncEnumerable<QueryHistoryEntryDto> GetLastQueryHistory(int amount = 5)
+            => queryHistoryRepository.GetLastEntries(QueryHistoryEntryDto.Selector, amount);
+
+        public async IAsyncEnumerable<(bool Successful, ShortMovieDto? Entry)> GetMoviesByTitle(string title)
         {
-            return omdbMovieRepository.GetMoviesByTitle(title)
+            //in a bigger project we would have exception handler for all Blazor service calls to not repeat try-catch every time
+            try
+            {
+                await queryHistoryRepository.AddQueryEntry(title);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Exception on query entity save");
+                throw;
+            }
+            
+
+            var entries = omdbMovieRepository.GetMoviesByTitle(title)
                 .Select(movie => (
                     movie.Success,
                     movie is { Success: true, Data: not null } ? new ShortMovieDto(
@@ -18,6 +35,9 @@ namespace MovieCatalog.Application.Services.AppServices
                         movie.Data.Type,
                         movie.Data.Poster) : null
                     ));
+
+            await foreach (var item in entries)
+                yield return item;
         }
 
         public async Task<(bool Successful, FullMovieDto? Entry)> GetMovieDetailsById(string id)

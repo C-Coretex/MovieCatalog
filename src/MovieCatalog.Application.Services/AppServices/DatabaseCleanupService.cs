@@ -1,12 +1,13 @@
 ﻿using MovieCatalog.Application.Contracts.IAppServices;
+using MovieCatalog.Domain.IRepositories;
 
 namespace MovieCatalog.Application.Services.AppServices
 {
-    internal class DatabaseCleanupService: IDatabaseCleanupService
+    internal class DatabaseCleanupService(IQueryHistoryRepository queryHistoryRepository): IDatabaseCleanupService
     {
-        public Task CleanupOldQueries()
+        public Task<int> CleanupOldQueries(int itemsToLeave = 5, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return queryHistoryRepository.DeleteOldEntries(itemsToLeave, cancellationToken);
         }
     }
 }

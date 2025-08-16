@@ -13,6 +13,7 @@ namespace MovieCatalog.Worker.Workers
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
+            logger.LogInformation("Worker started");
             while (!cancellationToken.IsCancellationRequested)
             {
                 var enabled = optionsMonitor.CurrentValue.IsEnabled;
@@ -27,7 +28,10 @@ namespace MovieCatalog.Worker.Workers
                 {
                     await using var scope = serviceScopeFactory.CreateAsyncScope();
                     var service = scope.ServiceProvider.GetRequiredService<IDatabaseCleanupService>();
-                    await service.CleanupOldQueries();
+
+                    var deletedAmount = await service.CleanupOldQueries(cancellationToken: cancellationToken);
+
+                    logger.LogInformation("Cleanup execution finished. Deleted items amount: {DeletedAmount}", deletedAmount);
                 }
                 catch (Exception e)
                 {
@@ -37,6 +41,7 @@ namespace MovieCatalog.Worker.Workers
                 var delay = optionsMonitor.CurrentValue.ExecutionIntervalInMinutes;
                 await Task.Delay(TimeSpan.FromMinutes(delay), cancellationToken);
             }
+            logger.LogInformation("Worker finished");
         }
     }
 }

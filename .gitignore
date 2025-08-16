@@ -445,3 +445,6 @@ FodyWeavers.xsd
 **/wwwroot/js/build
 
 .containers/
+
+#sqlite
+*.db*

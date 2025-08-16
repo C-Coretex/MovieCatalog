@@ -3,6 +3,9 @@
     <UserSecretsId>f3a83b6b-6bd0-4346-8432-dcd0e0dd89f4</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="HtmlSanitizer" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\MovieCatalog.Application.Services\MovieCatalog.Application.Services.csproj" />
     <ProjectReference Include="..\MovieCatalog.Infrastructure.Migrations\MovieCatalog.Infrastructure.Migrations.csproj" />
     <ProjectReference Include="..\MovieCatalog.Infrastructure\MovieCatalog.Infrastructure.csproj" />

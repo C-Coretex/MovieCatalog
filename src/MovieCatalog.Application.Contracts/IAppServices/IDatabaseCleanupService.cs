@@ -2,6 +2,6 @@
 {
     public interface IDatabaseCleanupService
     {
-        Task CleanupOldQueries();
+        Task<int> CleanupOldQueries(int itemsToLeave = 5, CancellationToken cancellationToken = default);
     }
 }
