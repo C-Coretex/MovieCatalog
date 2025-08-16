@@ -1,0 +1,23 @@
+﻿using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace MovieCatalog.Providers.Omdb.Converters
+{
+    internal class IntConverter : JsonConverter<int?>
+    {
+        public override int? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            var value = reader.GetString();
+            if (string.IsNullOrEmpty(value))
+                return null;
+
+            return int.Parse(value.Replace(",", ""), CultureInfo.InvariantCulture);
+        }
+
+        public override void Write(Utf8JsonWriter writer, int? value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value?.ToString(CultureInfo.InvariantCulture));
+        }
+    }
+}
