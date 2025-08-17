@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using MovieCatalog.Providers.Omdb.Helpers;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -9,10 +10,10 @@ namespace MovieCatalog.Providers.Omdb.Converters
         public override float Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var value = reader.GetString();
-            if (string.IsNullOrEmpty(value))
+            if (value.IsStringEmpty())
                 return 0;
 
-            var isPercent = value.EndsWith("%", StringComparison.Ordinal);
+            var isPercent = value!.EndsWith("%", StringComparison.Ordinal);
             if(isPercent)
                 return float.Parse(value.TrimEnd('%'), CultureInfo.InvariantCulture) / 100;
 

@@ -6,5 +6,10 @@
         {
             return value ?? "N/A";
         }
+
+        public static bool IsStringEmpty(this string? value)
+        {
+            return string.IsNullOrEmpty(value) || string.Equals(value, "N/A", StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

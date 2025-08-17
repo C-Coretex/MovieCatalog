@@ -22,7 +22,7 @@ namespace MovieCatalog.Providers.Omdb.IntegrationTests.RepositoryTests
         public async Task GetMovieByTitle_ShouldReturnMovieOrNull(bool existingMovie)
         {
             var title = existingMovie ? "Avatar" : "NON_EXISTING_MOVIEasdasdasd";
-            var movies = await _omdbMovieRepository.GetMoviesByTitle(title).ToListAsync();
+            var movies = await _omdbMovieRepository.GetMoviesByTitle(title, TestContext.Current.CancellationToken).ToListAsync();
 
             movies.Should().NotBeNull();
             if (existingMovie)
@@ -48,7 +48,7 @@ namespace MovieCatalog.Providers.Omdb.IntegrationTests.RepositoryTests
         public async Task GetMovieDetails_ShouldReturnMovieDetails(bool existingMovie)
         {
             var id = existingMovie ? "tt0499549" : "tt999a999";
-            var details = await _omdbMovieRepository.GetMovieDetailsById(id);
+            var details = await _omdbMovieRepository.GetMovieDetailsById(id, TestContext.Current.CancellationToken);
 
             details.Should().NotBeNull();
             if (existingMovie)

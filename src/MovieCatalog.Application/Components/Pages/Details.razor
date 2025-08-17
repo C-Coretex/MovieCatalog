@@ -6,54 +6,104 @@
 
 <PageTitle>Movie Details</PageTitle>
 
-<h3>Movie Details for @(_entry is null ? Id : _entry.Title)</h3>
+<h3 class="mb-3">Movie Details for @(_entry is null ? Id : _entry.Title)</h3>
 
 @if (_entry is null)
 {
-    <p>Loading...</p>
+    <div class="text-muted fst-italic">Loading...</div>
 }
 else
 {
-    <div>
-        <h4>@_entry.Title (@_entry.Year)</h4>
-        <img src="@_entry.PosterUrl" alt="Movie Poster" style="max-width:200px;" />
+    <div class="card mb-4 pe-2">
+        <div class="row">
+            <div class="col-md-3">
+                @if (_entry.PosterUrl != "N/A")
+                {
+                    <img src="@_entry.PosterUrl" alt="@_entry.Title Poster" class="img-fluid rounded float-left" />
+                }
+                else
+                {
+                    <span class="text-muted">N/A</span>
+                }
+            </div>
 
-        <p><strong>Director:</strong> @_entry.Director</p>
-        <p><strong>Actors:</strong> @string.Join(", ", _entry.Actors)</p>
-        <p><strong>Plot:</strong> @_entry.Plot</p>
-        <p><strong>Genres:</strong> @string.Join(", ", _entry.Genres)</p>
-        <p><strong>Languages:</strong> @string.Join(", ", _entry.Languages)</p>
-        <p><strong>Countries:</strong> @string.Join(", ", _entry.Countries)</p>
-        <p><strong>Awards:</strong> @_entry.Awards</p>
-        <p><strong>Runtime:</strong> @_entry.Runtime</p>
-        <p><strong>Rated:</strong> @_entry.Rated</p>
-        <p><strong>Released:</strong> @_entry.Released</p>
-        <p><strong>Dvd:</strong> @_entry.Dvd</p>
-        <p><strong>BoxOffice:</strong> @_entry.BoxOffice</p>
-        <p><strong>Production:</strong> @_entry.Production</p>
-        <p><strong>Metascore:</strong> @_entry.Metascore</p>
-        <p><strong>IMDB Rating:</strong> @_entry.ImdbRating</p>
-        <p><strong>IMDB Votes:</strong> @_entry.ImdbVotes</p>
-        <p><strong>Type:</strong> @_entry.Type</p>
-        <p><strong>IMDB ID:</strong> @_entry.ImdbId</p>
+            <div class="col-md-9 mt-2">
+                <h4 class="fw-bold">@_entry.Title <span class="fst-italic">(@_entry.Year)</span></h4>
+                
+                <!--I really didn't want to write all the parameters here by hand, so I asked AI to generate details properties UI-->
+                <dl class="row">
+                    <dt class="col-sm-3">Director:</dt>
+                    <dd class="col-sm-9">@_entry.Director</dd>
 
-        <p><strong>Ratings:</strong> 
-            @foreach (var rating in _entry.Ratings)
-            {
-                <span>@rating.Source: @rating.ValuePercent% </span>
-            }
-        </p>
+                    <dt class="col-sm-3">Actors:</dt>
+                    <dd class="col-sm-9">@string.Join(", ", _entry.Actors)</dd>
+
+                    <dt class="col-sm-3">Plot:</dt>
+                    <dd class="col-sm-9">@_entry.Plot</dd>
+
+                    <dt class="col-sm-3">Genres:</dt>
+                    <dd class="col-sm-9">@string.Join(", ", _entry.Genres)</dd>
+
+                    <dt class="col-sm-3">Languages:</dt>
+                    <dd class="col-sm-9">@string.Join(", ", _entry.Languages)</dd>
+
+                    <dt class="col-sm-3">Countries:</dt>
+                    <dd class="col-sm-9">@string.Join(", ", _entry.Countries)</dd>
+
+                    <dt class="col-sm-3">Awards:</dt>
+                    <dd class="col-sm-9">@_entry.Awards</dd>
+
+                    <dt class="col-sm-3">Runtime:</dt>
+                    <dd class="col-sm-9">@_entry.Runtime</dd>
+
+                    <dt class="col-sm-3">Rated:</dt>
+                    <dd class="col-sm-9">@_entry.Rated</dd>
+
+                    <dt class="col-sm-3">Released:</dt>
+                    <dd class="col-sm-9">@_entry.Released</dd>
+
+                    <dt class="col-sm-3">DVD:</dt>
+                    <dd class="col-sm-9">@_entry.Dvd</dd>
+
+                    <dt class="col-sm-3">BoxOffice:</dt>
+                    <dd class="col-sm-9">@_entry.BoxOffice</dd>
+
+                    <dt class="col-sm-3">Production:</dt>
+                    <dd class="col-sm-9">@_entry.Production</dd>
+
+                    <dt class="col-sm-3">Metascore:</dt>
+                    <dd class="col-sm-9">@_entry.Metascore</dd>
+
+                    <dt class="col-sm-3">IMDB Rating:</dt>
+                    <dd class="col-sm-9">@_entry.ImdbRating</dd>
+
+                    <dt class="col-sm-3">IMDB Votes:</dt>
+                    <dd class="col-sm-9">@_entry.ImdbVotes</dd>
+
+                    <dt class="col-sm-3">Type:</dt>
+                    <dd class="col-sm-9">@_entry.Type</dd>
+
+                    <dt class="col-sm-3">Ratings:</dt>
+                    <dd class="col-sm-9">
+                        @foreach (var rating in _entry.Ratings)
+                        {
+                            <span class="badge bg-secondary me-1">@rating.Source: <b>@rating.ValuePercent%</b></span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
     </div>
 }
 @if (_apiException)
 {
-    <p>There was an exception with API. Please try again.</p>
+    <p clas="alert alert-danger">There was an exception with API. Please try again.</p>
 }
 
 @code {
 
     [SupplyParameterFromQuery]
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     private FullMovieDto? _entry;
     private bool _apiException;

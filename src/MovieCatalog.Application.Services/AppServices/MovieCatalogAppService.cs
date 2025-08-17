@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 using MovieCatalog.Application.Contracts.DTOs;
 using MovieCatalog.Application.Contracts.IAppServices;
 using MovieCatalog.Domain.IRepositories;
@@ -11,11 +12,13 @@ namespace MovieCatalog.Application.Services.AppServices
         public IAsyncEnumerable<QueryHistoryEntryDto> GetLastQueryHistory(int amount = 5)
             => queryHistoryRepository.GetLastEntries(QueryHistoryEntryDto.Selector, amount);
 
-        public async IAsyncEnumerable<(bool Successful, ShortMovieDto? Entry)> GetMoviesByTitle(string title)
+        public async IAsyncEnumerable<(bool Successful, ShortMovieDto? Entry)> GetMoviesByTitle(string title, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             //in a bigger project we would have exception handler for all Blazor service calls to not repeat try-catch every time
             try
             {
+                //we also could add empty/null check here to not save empty search queries (which we are filtering on client side)
+                //but not sure if it would be correct business logic here
                 await queryHistoryRepository.AddQueryEntry(title);
             }
             catch (Exception e)
@@ -24,7 +27,7 @@ namespace MovieCatalog.Application.Services.AppServices
                 throw;
             }
 
-            var entries = omdbMovieRepository.GetMoviesByTitle(title)
+            var entries = omdbMovieRepository.GetMoviesByTitle(title, cancellationToken)
                 .Select(movie => (
                     movie.Success,
                     movie is { Success: true, Data: not null } ? new ShortMovieDto(
@@ -35,7 +38,7 @@ namespace MovieCatalog.Application.Services.AppServices
                         movie.Data.Poster) : null
                     ));
 
-            await foreach (var item in entries)
+            await foreach (var item in entries.WithCancellation(cancellationToken))
                 yield return item;
         }
 

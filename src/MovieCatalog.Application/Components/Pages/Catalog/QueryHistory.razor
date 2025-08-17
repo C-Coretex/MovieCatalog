@@ -1,0 +1,55 @@
+﻿@using Ganss.Xss
+@using MovieCatalog.Application.Contracts.DTOs
+@using MovieCatalog.Application.Contracts.IAppServices
+@attribute [StreamRendering]
+@inject IMovieCatalogAppService MovieCatalogAppService
+
+<div>
+    <h4 class="mb-3">Last query history:</h4>
+    @if (_queryHistory is null)
+    {
+        <div class="text-muted fst-italic">Loading history...</div>
+    }
+    else if (_queryHistory.Count == 0)
+    {
+        <div class="text-muted fst-italic">No history for now</div>
+    }
+    else
+    {
+        <ul class="list-group list-group-flush">
+            @foreach (var item in _queryHistory)
+            {
+                <li class="list-group-item px-0">
+                    <a class="fw-bold me-2 text-decoration-none pointer"
+                       @onclick="() => OnHistoryClickTrigger.InvokeAsync(item.Query)">
+                        @item.Query
+                    </a>
+                    <span class="small text-muted">(@item.Timestamp)</span>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<string> OnHistoryClickTrigger { get; set; }
+
+    private ICollection<QueryHistoryEntryDto>? _queryHistory;
+
+    protected override Task OnInitializedAsync()
+    {
+        return SetQueryHistory();
+    }
+
+    private async Task SetQueryHistory()
+    {
+        var sanitizer = new HtmlSanitizer();
+        _queryHistory = await MovieCatalogAppService.GetLastQueryHistory().Select(x => x with { Query = sanitizer.Sanitize(x.Query) }).ToListAsync();
+    }
+
+    public Task Refresh()
+    {
+        return SetQueryHistory();
+    }
+}

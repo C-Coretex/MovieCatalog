@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using MovieCatalog.Providers.Omdb.Helpers;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace MovieCatalog.Providers.Omdb.Converters
@@ -8,7 +9,7 @@ namespace MovieCatalog.Providers.Omdb.Converters
         public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var value = reader.GetString();
-            return !string.IsNullOrEmpty(value) && value.Equals("True", StringComparison.Ordinal);
+            return !value.IsStringEmpty() && value!.Equals("True", StringComparison.Ordinal);
         }
 
         public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)

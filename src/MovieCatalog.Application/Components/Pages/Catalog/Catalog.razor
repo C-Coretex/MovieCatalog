@@ -1,0 +1,140 @@
+﻿@page "/catalog"
+@attribute [StreamRendering]
+@using MovieCatalog.Application.Contracts.DTOs
+@using MovieCatalog.Application.Contracts.IAppServices
+@inject IMovieCatalogAppService MovieCatalogAppService
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
+<PageTitle>Movie Catalog</PageTitle>
+
+<div class="d-flex justify-content-between mb-3">
+    <div>
+        <h3>Movie Catalog</h3>
+        <div class="">
+            <h4 class="mb-3">Search by movie title</h4>
+
+            <div class="input-group">
+                <input type="text" class="form-control" @bind-value="TitleQuery" @bind-value:event="oninput" @onkeydown="HandleSearchKeyDown" placeholder="Enter movie title..." />
+                <button class="btn btn-primary" @onclick="OnSearchAsync">Search</button>
+            </div>
+        </div>
+    </div>
+    <div class="me-3">
+        <QueryHistory @ref="_queryHistoryComponent"
+                      OnHistoryClickTrigger="OnHistoryClickTrigger" />
+    </div>
+</div>
+<br />
+@if (_results is not null)
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Poster</th>
+                <th>Title</th>
+                <th>Year</th>
+                <th>Type</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in _results)
+            {
+                <tr>
+                    <td class="text-center poster">
+                        @if (item.Poster != "N/A")
+                        {
+                            <img src="@item.Poster" alt="Movie poster" class="poster" />
+                        }
+                        else
+                        {
+                            <span class="text-muted">N/A</span>
+                        }
+                    </td>
+                    <td>@item.Title</td>
+                    <td>@item.Year</td>
+                    <td>@item.Type</td>
+                    <td>
+                        <a href="/details?id=@item.ImdbId" class="btn btn-sm btn-primary">Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Please input some value.</p>
+}
+@if (_apiException)
+{
+    <p class="alert alert-danger">There was an exception with API. Please try again.</p>
+}
+
+@code {
+    public string TitleQuery { get; set; } = string.Empty;
+    private string? _lastQuery;
+    private bool _apiException;
+    private LinkedList<ShortMovieDto>? _results; //linked list, since we will add items one by one without accessing by index
+    private QueryHistory? _queryHistoryComponent;
+    private CancellationTokenSource? _cancellationTokenSource;
+
+    private async Task OnHistoryClickTrigger(string titleQuery)
+    {
+        TitleQuery = titleQuery;
+        await OnSearchAsync();
+    }
+
+    private async Task HandleSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await OnSearchAsync();
+    }
+
+    private async Task OnSearchAsync()
+    {
+        if (string.Equals(TitleQuery, _lastQuery, StringComparison.Ordinal))
+            return;
+
+        _lastQuery = TitleQuery;
+        _apiException = false;
+        if (string.IsNullOrWhiteSpace(TitleQuery))
+        {
+            _results = null;
+            return;
+        }
+
+        if (_cancellationTokenSource != null)
+            await _cancellationTokenSource.CancelAsync();
+        _cancellationTokenSource = new CancellationTokenSource();
+
+        _results = [];
+        var isQueryHistorySet = false;
+        try
+        {
+            await foreach (var item in MovieCatalogAppService.GetMoviesByTitle(TitleQuery, _cancellationTokenSource.Token))
+            {
+                if (!isQueryHistorySet)
+                {
+                    if (_queryHistoryComponent != null)
+                        await _queryHistoryComponent.Refresh();
+                    isQueryHistorySet = true;
+                }
+
+                //stream failed
+                if (!item.Successful || item.Entry == null)
+                {
+                    _results = null;
+                    _apiException = true;
+                    break;
+                }
+
+                _results?.AddLast(item.Entry!); //should not be null, but in rare scenarios there could be race conditions
+
+                //if it will be a performance problem we can add something like debounce, so we will send updates in batches
+                StateHasChanged();
+            }
+        }
+        catch (OperationCanceledException) // ignore cancel request
+        { }
+    }
+}

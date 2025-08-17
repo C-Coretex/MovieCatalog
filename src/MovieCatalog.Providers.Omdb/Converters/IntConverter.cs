@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using MovieCatalog.Providers.Omdb.Helpers;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -9,10 +10,10 @@ namespace MovieCatalog.Providers.Omdb.Converters
         public override int? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var value = reader.GetString();
-            if (string.IsNullOrEmpty(value))
+            if (value.IsStringEmpty())
                 return null;
 
-            return int.Parse(value.Replace(",", ""), CultureInfo.InvariantCulture);
+            return int.Parse(value!.Replace(",", ""), CultureInfo.InvariantCulture);
         }
 
         public override void Write(Utf8JsonWriter writer, int? value, JsonSerializerOptions options)
