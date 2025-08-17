@@ -10,8 +10,10 @@ namespace MovieCatalog.Worker.Extensions
         {
             serviceCollection.RegisterMovieCatalogDatabase(movieCatalogConnectionString);
 
+            //if the project would be bigger, we would separate Application AppServices and Worker AppServices
+            //then we wouldn't need to register RegisterOmdbProvider, since we are not using it in any Worker AppService
             serviceCollection.RegisterOmdbProvider(configuration);
-            serviceCollection.RegisterAppServices(); //if the project would be bigger, we would separate Application AppServices and Worker AppServices
+            serviceCollection.RegisterAppServices();
 
             return serviceCollection;
         }
