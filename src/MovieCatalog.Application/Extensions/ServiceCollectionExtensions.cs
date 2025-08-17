@@ -11,7 +11,7 @@ namespace MovieCatalog.Application.Extensions
             serviceCollection.RegisterMovieCatalogDatabase(movieCatalogConnectionString);
 
             serviceCollection.RegisterOmdbProvider(configuration);
-            serviceCollection.RegisterAppServices();
+            serviceCollection.RegisterAppServicesApplication();
 
             return serviceCollection;
         }

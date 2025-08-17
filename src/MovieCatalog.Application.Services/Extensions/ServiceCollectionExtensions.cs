@@ -6,9 +6,15 @@ namespace MovieCatalog.Application.Services.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection RegisterAppServices(this IServiceCollection serviceCollection)
+        public static IServiceCollection RegisterAppServicesApplication(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddScoped<IMovieCatalogAppService, MovieCatalogAppService>();
+
+            return serviceCollection;
+        }
+
+        public static IServiceCollection RegisterAppServicesWorker(this IServiceCollection serviceCollection)
+        {
             serviceCollection.AddScoped<IDatabaseCleanupService, DatabaseCleanupService>();
 
             return serviceCollection;

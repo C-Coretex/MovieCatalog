@@ -1,6 +1,5 @@
 ﻿using MovieCatalog.Application.Services.Extensions;
 using MovieCatalog.Infrastructure.Extensions;
-using MovieCatalog.Providers.Omdb.Extensions;
 
 namespace MovieCatalog.Worker.Extensions
 {
@@ -10,10 +9,8 @@ namespace MovieCatalog.Worker.Extensions
         {
             serviceCollection.RegisterMovieCatalogDatabase(movieCatalogConnectionString);
 
-            //if the project would be bigger, we would separate Application AppServices and Worker AppServices
-            //then we wouldn't need to register RegisterOmdbProvider, since we are not using it in any Worker AppService
-            serviceCollection.RegisterOmdbProvider(configuration);
-            serviceCollection.RegisterAppServices();
+            //if the project would be bigger, we would separate Application AppServices and Worker AppServices into different projects (at least .Contracts)
+            serviceCollection.RegisterAppServicesWorker();
 
             return serviceCollection;
         }
