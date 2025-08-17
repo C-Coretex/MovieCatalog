@@ -13,7 +13,7 @@ namespace MovieCatalog.Infrastructure.Migrations.Factory
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            var connectionString = config.GetConnectionString(nameof(MovieCatalogMigrationsDbContext));
+            var connectionString = config.GetConnectionString("MovieCatalogConnectionString");
 
             var optionsBuilder = new DbContextOptionsBuilder().UseSqlite(connectionString);
             return new MovieCatalogMigrationsDbContext(optionsBuilder.Options);
