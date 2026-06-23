@@ -1,4 +1,6 @@
-﻿using MovieCatalog.Providers.Omdb.Constants;
+﻿using MovieCatalog.Providers.Omdb.Clients;
+using MovieCatalog.Providers.Omdb.Constants;
+using MovieCatalog.Providers.Omdb.Contracts.Clients;
 using MovieCatalog.Providers.Omdb.Contracts.DTOs;
 using MovieCatalog.Providers.Omdb.Contracts.IRepositories;
 using MovieCatalog.Providers.Omdb.DTOs;
@@ -6,11 +8,10 @@ using MovieCatalog.Providers.Omdb.Helpers;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using MovieCatalog.Providers.Omdb.Contracts.Clients;
 
 namespace MovieCatalog.Providers.Omdb.Repositories
 {
-    internal class OmdbMovieRepository(OmdbApiClient client) : IOmdbMovieRepository
+    internal class OmdbMovieRepository(IOmdbApiClient client) : IOmdbMovieRepository
     {
         private const int PageSize = 10;
         private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
@@ -29,27 +30,15 @@ namespace MovieCatalog.Providers.Omdb.Repositories
             do
             {
                 //in future if the repository would support more filters/options, we could introduce request builder e.g. request.AddFilter(new TitleFilter(title));
-                var data = await client.GetAsync(
-                    cancellationToken,
-                    (OmdbConstants.QueryNames.TitleAllName, title),
-                    (OmdbConstants.QueryNames.PageName, (++i).ToString()));
+                var response = await client.SearchByTitleAsync(
+                    title,
+                    ++i,
+                    cancellationToken);
 
-                var json = await data.Content.ReadAsStringAsync(cancellationToken);
-
-                try
-                {
-                    var response = JsonSerializer.Deserialize<OmdbResponseDto>(json, _jsonOptions);
-                    if (response?.Response != true)
-                        break;
-                }
-                catch (JsonException)
-                {
-                    // Using this, because sometimes with incorrect Id passed, API returns error with incorrect Json (there are '"' inside of string value)
-                    // JsonDeserializer throws the exception and the easiest way to handle it is to catch it.
+                if (response.Error != null || response.Content?.Response != true)
                     break;
-                }
+                var result = response.Content;
 
-                var result = JsonSerializer.Deserialize<OmdbShortResponseDto>(json, _jsonOptions);
                 isSuccess = result?.Response == true;
                 if (!isSuccess) 
                     break;
@@ -74,27 +63,15 @@ namespace MovieCatalog.Providers.Omdb.Repositories
 
         public async Task<OmdbResult<FullMovieOmdbDto>> GetMovieDetailsById(string id, CancellationToken cancellationToken = default)
         {
-            var data = await client.GetAsync(
-                cancellationToken,
-                (OmdbConstants.QueryNames.IdFirstName, id),
-                (OmdbConstants.QueryNames.PlotTypeName, OmdbConstants.PlotTypes.Full));
+            var response = await client.GetByIdAsync(
+                id,
+                OmdbConstants.PlotTypes.Full,
+                cancellationToken);
 
-            var json = await data.Content.ReadAsStringAsync(cancellationToken);
-
-            try
-            {
-                var response = JsonSerializer.Deserialize<OmdbResponseDto>(json, _jsonOptions);
-                if (response?.Response != true)
-                    return OmdbResult<FullMovieOmdbDto>.CreateFailed();
-            }
-            catch (JsonException)
-            {
-                // Using this, because sometimes with incorrect Id passed, API returns error with incorrect Json (there are '"' inside of string value)
-                // JsonDeserializer throws the exception and the easiest way to handle it is to catch it.
+            if (response.Error != null || response.Content?.Response != true)
                 return OmdbResult<FullMovieOmdbDto>.CreateFailed();
-            }
+            var result = response.Content;
 
-            var result = JsonSerializer.Deserialize<OmdbFullResponseDto>(json, _jsonOptions);
             if (result?.Response != true)
                 return OmdbResult<FullMovieOmdbDto>.CreateFailed();
 

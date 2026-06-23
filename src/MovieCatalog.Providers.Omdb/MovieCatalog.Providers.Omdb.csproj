@@ -2,6 +2,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Refit" />
+    <PackageReference Include="Refit.HttpClientFactory" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MovieCatalog.Providers.Omdb.Contracts\MovieCatalog.Providers.Omdb.Contracts.csproj" />
@@ -13,3 +15,4 @@
     </AssemblyAttribute>
   </ItemGroup>
 </Project>
+
